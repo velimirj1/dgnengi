@@ -10,8 +10,10 @@ export default merge(common, {
     mode: 'development',
     devServer: {
         contentBase: path.join(__dirname, './public'),
-        publicPath: 'http://localhost:8080/js/',
+        publicPath: '/js/',
         compress: true,
-        port: 8080
+        port: 8080,
+        host: '0.0.0.0',
+        disableHostCheck: true
     }
 })

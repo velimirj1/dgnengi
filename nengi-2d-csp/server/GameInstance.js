@@ -12,7 +12,7 @@ import gameConstants from '../common/gameConstants.js'
 class GameInstance {
     constructor() {
         this.players = new Map()
-        this.instance = new nengi.Instance(nengiConfig, { port: 8079 })
+        this.instance = new nengi.Instance(nengiConfig, { port: 8079, host: '0.0.0.0' })
         this.instance.onConnect((client, clientData, callback) => {
 
             // create a entity for this client

@@ -107,7 +107,11 @@ class Instance extends EventEmitter {
         }
 
         if (typeof webConfig.port !== 'undefined') {
-            this.wsServer = new WebSocketServer({ port: webConfig.port }, () => {
+            const wsOptions = { port: webConfig.port }
+            if (webConfig.host) {
+                wsOptions.host = webConfig.host
+            }
+            this.wsServer = new WebSocketServer(wsOptions, () => {
                 //console.log(this.wsServer)
             })
         } else if (typeof webConfig.httpServer !== 'undefined') {

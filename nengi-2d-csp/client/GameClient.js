@@ -15,7 +15,9 @@ class GameClient {
             console.log('connection closed')
         })
 
-        this.client.connect('ws://localhost:8079')       
+        // Connect to the server using current hostname (works for both localhost and network access)
+        const serverHost = window.location.hostname || 'localhost'
+        this.client.connect(`ws://${serverHost}:8079`)       
     }
 
     update(delta, tick, now) {

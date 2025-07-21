@@ -6,7 +6,7 @@
   "scripts": {
     "start": "npx npm-run-all --parallel server client",
     "server": "npx nodemon ./server/index.js --ignore public",
-    "client": "set NODE_OPTIONS=--openssl-legacy-provider && npx webpack-dev-server --config webpack.dev.js",
+    "client": "set NODE_OPTIONS=--openssl-legacy-provider && npx webpack-dev-server --config webpack.dev.js --host 0.0.0.0",
     "build": "set NODE_OPTIONS=--openssl-legacy-provider && npx webpack --config webpack.prod.js"
   },
   "author": "timetocode // Alex",
