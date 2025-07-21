@@ -8,10 +8,8 @@ class InputSystem {
             s: false,
             a: false,
             d: false,
-            r: false,
             mx: 0,
-            my: 0,
-            mouseDown: false
+            my: 0
         }
 
         this.frameState = {
@@ -19,9 +17,6 @@ class InputSystem {
             s: false,
             a: false,
             d: false,
-            r: false,
-            mouseDown: false,
-            justReleasedR: false
         }
 
         // disable right click
@@ -52,11 +47,6 @@ class InputSystem {
                 this.frameState.d = true
             }
 
-            // r
-            if (event.keyCode === 82) {
-                this.currentState.r = true
-                this.frameState.r = true
-            }
         })
 
         document.addEventListener('keyup', event => {
@@ -74,13 +64,6 @@ class InputSystem {
                 this.currentState.d = false
             }
 
-            if (event.keyCode === 82) {
-                if (this.currentState.r === true) {
-                    // used to implement reload on keyup instead of keydown
-                    this.frameState.justReleasedR = true
-                }
-                this.currentState.r = false
-            }
         })
 
         document.addEventListener('mousemove', event => {
@@ -91,15 +74,6 @@ class InputSystem {
             }
         })
 
-        document.addEventListener('pointerdown', event => {
-            this.currentState.mouseDown = true
-            this.frameState.mouseDown = true
-        })
-
-
-        document.addEventListener('mouseup', event => {
-            this.currentState.mouseDown = false
-        })
     }
 
     releaseKeys() {
@@ -107,9 +81,6 @@ class InputSystem {
         this.frameState.a = this.currentState.a
         this.frameState.s = this.currentState.s
         this.frameState.d = this.currentState.d
-        this.frameState.r = this.currentState.r
-        this.frameState.mouseDown = this.currentState.mouseDown
-        this.frameState.justReleasedR = false
     }
 }
 

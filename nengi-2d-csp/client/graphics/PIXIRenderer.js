@@ -2,6 +2,7 @@ import * as PIXI from 'pixi.js'
 import PlayerCharacter from './PlayerCharacter.js'
 import BackgroundGrid from './BackgroundGrid.js'
 import Obstacle from './Obstacle.js'
+import gameConstants from '../../common/gameConstants.js'
 
 class PIXIRenderer {
     constructor(input, sounds) {
@@ -32,9 +33,13 @@ class PIXIRenderer {
         this.stage.addChild(this.camera)
 
         this.background.addChild(new BackgroundGrid())
+        
+        // Center the camera on the map
+        this.centerCameraOnMap()
 
         window.addEventListener('resize', () => {
             this.resize()
+            this.centerCameraOnMap()
         })
 
         this.resize()
@@ -92,42 +97,35 @@ class PIXIRenderer {
         }
     }
 
-    drawHitscan(x, y, targetX, targetY, color) {
-        let graphics = new PIXI.Graphics()
-        graphics.lineStyle(1, color)
-        graphics.moveTo(x, y)
-        graphics.lineTo(targetX, targetY)
-        this.middleground.addChild(graphics)
-        setTimeout(() => {
-            this.middleground.removeChild(graphics)
-            graphics.destroy({
-                children: true,
-                texture: true,
-                baseTexture: true
-            })
-        }, 64)
-    }
 
  
+    centerCameraOnMap() {
+        // Calculate scale to fit map on screen while maintaining aspect ratio
+        const scaleX = window.innerWidth / gameConstants.MAP_WIDTH
+        const scaleY = window.innerHeight / gameConstants.MAP_HEIGHT
+        
+        // Use the smaller scale to ensure the entire map fits on screen
+        const scale = Math.min(scaleX, scaleY) * 0.9 // 0.9 to add some padding
+        
+        this.camera.scale.set(scale, scale)
+        
+        // Center the scaled map in the middle of the screen
+        this.camera.x = (window.innerWidth - gameConstants.MAP_WIDTH * scale) / 2
+        this.camera.y = (window.innerHeight - gameConstants.MAP_HEIGHT * scale) / 2
+    }
+    
     centerCamera(entity) {
-        this.camera.x = -entity.x + 0.5 * window.innerWidth
-        this.camera.y = -entity.y + 0.5 * window.innerHeight
+        // Camera is now static - don't move it
+        // The map is already centered via centerCameraOnMap()
     }
 
-    followSmoothlyWithCamera(entity, delta) {
-        const cameraSpeed = 5
-        const targetX = -entity.x + 0.5 * window.innerWidth
-        const targetY = -entity.y + 0.5 * window.innerHeight
-        const dx = targetX - this.camera.x
-        const dy = targetY - this.camera.y
-        this.camera.x += dx * cameraSpeed * delta
-        this.camera.y += dy * cameraSpeed * delta
-    }
 
     toWorldCoordinates(mouseX, mouseY) {
+        // Account for camera position and scale
+        const scale = this.camera.scale.x
         return {
-            x: -this.camera.x + mouseX,
-            y: -this.camera.y + mouseY
+            x: (mouseX - this.camera.x) / scale,
+            y: (mouseY - this.camera.y) / scale
         }
     }
 
@@ -141,7 +139,7 @@ class PIXIRenderer {
 
     update(delta) {
         if (this.myEntity) {
-            this.centerCameraAndFollowScope(this.myEntity, 0.5, delta)
+            // Camera is static, no following
         }
 
         this.entities.forEach(entity => {

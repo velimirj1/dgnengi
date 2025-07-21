@@ -1,9 +1,7 @@
 import nengi from 'nengi'
 import PlayerCharacter from './entity/PlayerCharacter.js'
 import Identity from './message/Identity.js'
-import WeaponFired from './message/WeaponFired.js'
 import MoveCommand from './command/MoveCommand.js'
-import FireCommand from './command/FireCommand.js'
 import Obstacle from './entity/Obstacle.js'
 
 const config = {
@@ -26,11 +24,9 @@ const config = {
         localMessages: [],
         messages: [
             ['Identity', Identity],
-            ['WeaponFired', WeaponFired]
         ],
         commands: [
-            ['MoveCommand', MoveCommand],
-            ['FireCommand', FireCommand]
+            ['MoveCommand', MoveCommand]
         ],
         basics: []
     }

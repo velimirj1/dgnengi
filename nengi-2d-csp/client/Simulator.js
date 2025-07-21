@@ -3,7 +3,6 @@ import PlayerCharacter from '../common/entity/PlayerCharacter.js'
 import Obstacle from '../common/entity/Obstacle.js'
 import InputSystem from './InputSystem.js'
 import MoveCommand from '../common/command/MoveCommand.js'
-import FireCommand from '../common/command/FireCommand.js'
 
 // ignoring certain data from the sever b/c we will be predicting these properties on the client
 const ignoreProps = ['x', 'y', 'rotation']
@@ -86,13 +85,7 @@ class Simulator {
     }
 
     processLocalMessage(message) {
-        if (message.protocol.name === 'WeaponFired') {
-            //console.log('server says a weapon was fired', message)
-            if (message.sourceId === this.mySmoothEntity.nid) {
-                return
-            }
-            this.renderer.drawHitscan(message.x, message.y, message.tx, message.ty, 0xff0000)
-        }
+        // No weapon messages to process
     }
 
     processPredictionError(predictionErrorFrame) {
@@ -125,10 +118,6 @@ class Simulator {
         })
     }
 
-    simulateShot(x, y, tx, ty) {
-        // TODO: simulate impact against entities/terrain
-        this.renderer.drawHitscan(x, y, tx, ty, 0xffffff)
-    }
 
     update(delta) {
         const input = this.input.frameState
@@ -163,16 +152,8 @@ class Simulator {
 
             const entity = this.myRawEntity
             this.renderer.move(entity.nid, entity.x, entity.y, rotation)
-            this.renderer.centerCamera(entity)
+            // Camera is now static - don't follow player
 
-            // shooting
-            this.myRawEntity.weaponSystem.update(delta)
-            if (input.mouseDown) {
-                if (this.myRawEntity.fire()) {
-                    this.client.addCommand(new FireCommand(worldCoord.x, worldCoord.y))
-                    this.simulateShot(this.myRawEntity.x, this.myRawEntity.y, worldCoord.x, worldCoord.y)
-                }
-            }
         }
 
 

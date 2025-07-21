@@ -2,12 +2,11 @@ import nengi from 'nengi'
 import nengiConfig from '../common/nengiConfig.js'
 import PlayerCharacter from '../common/entity/PlayerCharacter.js'
 import Identity from '../common/message/Identity.js'
-import WeaponFired from '../common/message/WeaponFired.js'
 import CollisionSystem from '../common/CollisionSystem.js'
 import Obstacle from '../common/entity/Obstacle.js'
 
 import followPath from './followPath.js'
-import damagePlayer from './damagePlayer.js'
+import gameConstants from '../common/gameConstants.js'
 
 
 class GameInstance {
@@ -18,6 +17,9 @@ class GameInstance {
 
             // create a entity for this client
             const rawEntity = new PlayerCharacter()
+            // Spawn player at center of map
+            rawEntity.x = gameConstants.MAP_WIDTH / 2
+            rawEntity.y = gameConstants.MAP_HEIGHT / 2
     
             // make the raw entity only visible to this client
             const channel = this.instance.createChannel()
@@ -29,6 +31,8 @@ class GameInstance {
             // smooth entity is visible to everyone
             const smoothEntity = new PlayerCharacter()
             smoothEntity.collidable = true
+            smoothEntity.x = rawEntity.x
+            smoothEntity.y = rawEntity.y
             this.instance.addEntity(smoothEntity)
 
             // tell the client which entities it controls
@@ -75,39 +79,6 @@ class GameInstance {
         this.obstacles = obstacles
     }
 
-    lagCompensatedHitscanCheck(x1, y1, x2, y2, timeAgo, onHit) {
-        const area = {
-            x: (x1 + x2) / 2,
-            y: (y1 + y2) / 2,
-            halfWidth: Math.abs(x2 - x1),
-            halfHeight: Math.abs(y2 - y1)
-        }
-
-        const compensatedEntityPositions = this.instance.historian.getLagCompensatedArea(timeAgo, area)
-        compensatedEntityPositions.forEach(entityProxy => {
-            // look up the real entity
-            const realEntity = this.instance.entities.get(entityProxy.nid)
-      
-            if (realEntity && realEntity.collidable) {
-                const tempX = realEntity.collider.pos.x
-                const tempY = realEntity.collider.pos.y
-
-                // rewind
-                realEntity.collider.pos.x = entityProxy.x
-                realEntity.collider.pos.y = entityProxy.y
-
-                const hit = CollisionSystem.checkLineCircle(x1, y1, x2, y2, realEntity.collider)
-
-                // restore
-                realEntity.collider.pos.x = tempX
-                realEntity.collider.pos.y = tempY
-
-                if (hit) {
-                    onHit(realEntity)
-                }
-            }
-        })
-    }
 
     update(delta, tick, now) {
         let cmd = null
@@ -127,23 +98,8 @@ class GameInstance {
                         y: rawEntity.y,
                         rotation: rawEntity.rotation
                     })
-                    rawEntity.weaponSystem.update(command.delta)
                 }
 
-                if (command.protocol.name === 'FireCommand') {
-
-                    if (rawEntity.fire()) {            
-                        const timeAgo = client.latency + 100
-
-                        this.lagCompensatedHitscanCheck(rawEntity.x, rawEntity.y, command.x, command.y, timeAgo, (victim) => {
-                            if (victim.nid !== rawEntity.nid && victim.nid !== smoothEntity.nid) {
-                                damagePlayer(victim)
-                            }
-                        })
-
-                        this.instance.addLocalMessage(new WeaponFired(smoothEntity.nid, smoothEntity.x, smoothEntity.y, command.x, command.y))
-                    }
-                }
             }
         } 
 

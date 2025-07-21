@@ -1,7 +1,7 @@
 import nengi from 'nengi'
-import WeaponSystem from '../WeaponSystem.js'
 import SAT from 'sat'
 import CollisionSystem from '../CollisionSystem.js'
+import gameConstants from '../gameConstants.js'
 
 class PlayerCharacter {
     constructor() {
@@ -17,15 +17,7 @@ class PlayerCharacter {
         }
 
         this.speed = 400
-        this.weaponSystem = new WeaponSystem()
         this.collider = new SAT.Circle(new SAT.Vector(this.x, this.y), 25)
-    }
-
-    fire() {
-        if (!this.isAlive) {
-            return false
-        }
-        return this.weaponSystem.fire()
     }
 
     processMove(command, obstacles) {
@@ -54,8 +46,16 @@ class PlayerCharacter {
         this.moveDirection.x = unitX
         this.moveDirection.y = unitY
 
+        // Apply movement
         this.x += this.moveDirection.x * this.speed * command.delta
         this.y += this.moveDirection.y * this.speed * command.delta
+
+        // Enforce boundaries
+        const radius = gameConstants.PLAYER_RADIUS
+        if (this.x - radius < 0) this.x = radius
+        if (this.x + radius > gameConstants.MAP_WIDTH) this.x = gameConstants.MAP_WIDTH - radius
+        if (this.y - radius < 0) this.y = radius
+        if (this.y + radius > gameConstants.MAP_HEIGHT) this.y = gameConstants.MAP_HEIGHT - radius
 
         this.collider.pos.x = this.x
         this.collider.pos.y = this.y
@@ -67,6 +67,12 @@ class PlayerCharacter {
             // make sure collider moves too, as moveWithCollisions may have move us
             this.collider.pos.x = this.x
             this.collider.pos.y = this.y
+            
+            // Re-enforce boundaries after collision detection
+            if (this.x - radius < 0) this.x = radius
+            if (this.x + radius > gameConstants.MAP_WIDTH) this.x = gameConstants.MAP_WIDTH - radius
+            if (this.y - radius < 0) this.y = radius  
+            if (this.y + radius > gameConstants.MAP_HEIGHT) this.y = gameConstants.MAP_HEIGHT - radius
         }
 
     }
